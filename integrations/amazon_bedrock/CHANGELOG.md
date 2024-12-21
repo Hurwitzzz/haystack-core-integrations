@@ -1,5 +1,26 @@
 # Changelog
 
+## [integrations/amazon_bedrock-v2.1.1] - 2024-12-18
+
+### 🐛 Bug Fixes
+
+- Fixes to Bedrock Chat Generator for compatibility with the new ChatMessage (#1250)
+
+
+## [integrations/amazon_bedrock-v2.1.0] - 2024-12-11
+
+### 🚀 Features
+
+- Support model_arn in AmazonBedrockGenerator (#1244)
+
+
+## [integrations/amazon_bedrock-v2.0.0] - 2024-12-10
+
+### 🚀 Features
+
+- Update AmazonBedrockChatGenerator to use Converse API (BREAKING CHANGE) (#1219)
+
+
 ## [integrations/amazon_bedrock-v1.1.1] - 2024-12-03
 
 ### 🐛 Bug Fixes
