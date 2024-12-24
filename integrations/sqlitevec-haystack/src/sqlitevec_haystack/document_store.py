@@ -31,7 +31,7 @@ meta JSONB)
 
 CREATE_VEC_TABLE_STATEMENT = """
 CREATE VIRTUAL TABLE IF NOT EXISTS {table_name}_vec USING vec0(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
+vec_id INTEGER PRIMARY KEY AUTOINCREMENT,
 embedding FLOAT[{embedding_dimension}])"""
 
 INSERT_MAIN_TABLE_STATEMENT = """
@@ -41,8 +41,8 @@ VALUES (:id, :vec_id, :content, :dataframe, :blob_data, :blob_meta, :blob_mime_t
 """
 
 INSERT_VEC_TABLE_STATEMENT = """
-INSERT INTO {table_name}_vec(id, embedding)
-VALUES (:id, :embedding)
+INSERT INTO {table_name}_vec(vec_id, embedding)
+VALUES (:vec_id, :embedding)
 """
 
 UPDATE_MAIN_TABLE_STATEMENT = """
@@ -57,7 +57,7 @@ meta = EXCLUDED.meta
 """
 
 UPDATE_VEC_TABLE_STATEMENT = """
-ON CONFLICT (id) DO UPDATE SET
+ON CONFLICT (vec_id) DO UPDATE SET
 embedding = EXCLUDED.embedding
 """
 
@@ -350,7 +350,7 @@ class SqliteVecDocumentStore:
         sql_filter = (
             "SELECT * FROM {table_name} "
             "LEFT JOIN {table_name}_vec " 
-            "ON {table_name}.vec_id = {table_name}_vec.id "
+            "ON {table_name}.vec_id = {table_name}_vec.vec_id "
         ).format(
             table_name=self.table_name
         )
@@ -433,7 +433,7 @@ class SqliteVecDocumentStore:
             with self._connection as connection:
                 cursor = connection.cursor()
                 try:
-                    db_vector["id"] = None
+                    db_vector["vec_id"] = None
                     db_vector["embedding"] = serialize_float32(db_vector["embedding"])
                     cursor.execute(sql_vec_table_insert, db_vector)
                 except Exception as ie:
