@@ -109,14 +109,14 @@ class OllamaChatGenerator:
         return default_from_dict(cls, data)
 
     def _message_to_dict(self, message: ChatMessage) -> Dict[str, str]:
-        return {"role": message.role.value, "content": message.content}
+        return {"role": message.role.value, "content": message.text}
 
     def _build_message_from_ollama_response(self, ollama_response: ChatResponse) -> ChatMessage:
         """
         Converts the non-streaming response from the Ollama API to a ChatMessage.
         """
         response_dict = ollama_response.model_dump()
-        message = ChatMessage.from_assistant(content=response_dict["message"]["content"])
+        message = ChatMessage.from_assistant(response_dict["message"]["content"])
         message.meta.update({key: value for key, value in response_dict.items() if key != "message"})
         return message
 
