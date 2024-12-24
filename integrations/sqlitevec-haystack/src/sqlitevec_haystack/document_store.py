@@ -12,6 +12,8 @@ from haystack.document_stores.errors import DocumentStoreError, DuplicateDocumen
 from haystack.document_stores.types import DuplicatePolicy
 from haystack.utils.auth import Secret, deserialize_secrets_inplace
 
+from .filters import _convert_filters_to_where_clause_and_params
+
 logger = logging.getLogger(__name__)
 
 # TODO: create a main table for sqlite, and two virtual tables for vector and fts
@@ -301,7 +303,7 @@ class SqliteVecDocumentStore:
         self._execute_sql(
             delete_sql,
             cursor=cursor,
-            error_msg=f"Could not delete table {self.table_name} in PgvectorDocumentStore",
+            error_msg=f"Could not delete table {self.table_name} in SqliteVecDocumentStore",
         )
         self._execute_sql(
             delete_vec_sql,

@@ -1,10 +1,10 @@
 from haystack import Document
 
-from aai_assistant.sqlite_vec.document_store import SqliteVecDocumentStore
+from sqlitevec_haystack.document_store import SqliteVecDocumentStore
 
 
 document_store = SqliteVecDocumentStore(
-    connection_string="test.db", embedding_dimension=3, recreate_table=True
+    connection_string="integrations/sqlitevec-haystack/test.db", embedding_dimension=3, recreate_table=True
 )
 document_store.connection
 
@@ -15,7 +15,14 @@ documents = [
 ]
 
 document_store.write_documents(documents)
-retrieved_documents = document_store.filter_documents()
+filters = {
+    "operator": "AND",
+    "conditions":[
+        {"field": "id", "operator": "==", "value": "123"},
+        # {"field": "content", "operator": "==", "value": "test"}
+    ]
+}
+retrieved_documents = document_store.filter_documents(filters=filters)
 
 # assert all(x in documents for x in retrieved_documents)
 
