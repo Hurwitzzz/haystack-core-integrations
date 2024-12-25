@@ -548,26 +548,43 @@ class SqliteVecDocumentStore:
     def delete_documents(self, document_ids: List[str]) -> None:
         """
         Deletes documents that match the provided `document_ids` from the document store.
+        Also removes the associated rows in the vector table, matching by `vec_id`.
 
-        :param document_ids: the document ids to delete
+        :param document_ids: the document IDs to delete
         """
-
         if not document_ids:
             return
 
-        document_ids_str = ", ".join(f"'{document_id}'" for document_id in document_ids)
+        document_ids_str = ", ".join("?" for _ in document_ids)
 
-        delete_sql = SQL(
-            "DELETE FROM {table_name} WHERE id IN ({document_ids_str})"
-        ).format(
-            table_name=Identifier(self.table_name),
-            document_ids_str=SQL(document_ids_str),
-        )
+        # Find the vec_ids for the documents we want to delete
+        select_vec_ids_sql = f"""
+        SELECT vec_id FROM {self.table_name}
+        WHERE id IN ({document_ids_str})
+        """
 
-        self._execute_sql(
-            delete_sql,
-            error_msg="Could not delete documents from PgvectorDocumentStore",
-        )
+        with self.connection as connection:
+            cursor = connection.cursor()
+
+            # Fetch all vec_ids for matching documents
+            cursor.execute(select_vec_ids_sql, document_ids)
+            found_vec_ids = [row["vec_id"] for row in cursor.fetchall() if row["vec_id"]]
+
+            # Delete from the main table
+            delete_main_sql = f"""
+            DELETE FROM {self.table_name}
+            WHERE id IN ({document_ids_str})
+            """
+            cursor.execute(delete_main_sql, document_ids)
+
+            # Delete the corresponding rows in the vector table
+            if found_vec_ids:
+                document_vec_ids_str = ", ".join("?" for _ in found_vec_ids)
+                delete_vec_sql = f"""
+                DELETE FROM {self.table_name}_vec
+                WHERE vec_id IN ({document_vec_ids_str})
+                """
+                cursor.execute(delete_vec_sql, found_vec_ids)
 
     def _keyword_retrieval(
         self,

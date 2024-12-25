@@ -22,8 +22,9 @@ filters = {
         # {"field": "content", "operator": "==", "value": "test"}
     ]
 }
-retrieved_documents = document_store.filter_documents(filters=filters)
 
+document_store.delete_documents(document_ids=["321", "123"])
+retrieved_documents = document_store.filter_documents(filters={})
 # assert all(x in documents for x in retrieved_documents)
 
 n_documents = document_store.count_documents()
